@@ -50,6 +50,7 @@ module Http =
         { url = ""; 
           method = HttpMethod.GET
           headers = []
+          overridenMimeType = None
           content = BodyContent.Empty }
 
     [<Emit("$1.split($0)")>]
@@ -79,6 +80,10 @@ module Http =
     /// Appends a list of headers to the request configuration
     let headers (values: Header list) (req: HttpRequest)  = 
         { req with headers = List.append req.headers values }
+
+    /// Specifies a MIME type other than the one provided by the server to be used instead when interpreting the data being transferred in a request. This may be used, for example, to force a stream to be treated and parsed as "text/xml", even if the server does not report it as such.
+    let overrideMimeType (value: string) (req: HttpRequest) = 
+        { req with overridenMimeType = Some value }
     
     /// Sends the request to the server
     let send (req: HttpRequest) : Async<HttpResponse> = 
@@ -91,6 +96,13 @@ module Http =
                     responseText = xhr.responseText
                     statusCode = int xhr.status 
                     responseType = xhr.responseType
+                    content = 
+                        match xhr.responseType with 
+                        | ("" | "text" | "json") -> ResponseContent.Text xhr.responseText
+                        | "arraybuffer" -> ResponseContent.ArrayBuffer (unbox xhr.response) 
+                        | "blob" -> ResponseContent.Blob (unbox xhr.response) 
+                        | _ -> ResponseContent.Unknown xhr.response 
+                    
                     responseHeaders = 
                         xhr.getAllResponseHeaders()
                         |> splitAt "\r\n"
@@ -104,6 +116,10 @@ module Http =
 
             for (Header(key, value)) in req.headers do
                 xhr.setRequestHeader(key, value) 
+
+            match req.overridenMimeType with  
+            | Some mimeType -> xhr.overrideMimeType(mimeType)
+            | None -> () 
 
             match req.method, req.content with 
             | GET, _ -> xhr.send(None) 

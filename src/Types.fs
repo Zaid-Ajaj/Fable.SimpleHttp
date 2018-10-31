@@ -20,13 +20,22 @@ type BodyContent =
 type HttpRequest = {
     url: string 
     method: HttpMethod 
-    headers: Header list 
+    headers: Header list
+    overridenMimeType: Option<string> 
     content: BodyContent
 } 
+
+[<RequireQualifiedAccess>]
+type ResponseContent = 
+    | Text of string 
+    | Blob of Fable.Import.Browser.Blob 
+    | ArrayBuffer of Fable.Import.JS.ArrayBuffer
+    | Unknown of obj
 
 type HttpResponse = {
     statusCode: int 
     responseText: string
     responseType: string 
     responseHeaders: Map<string, string>
+    content : ResponseContent
 } 

@@ -1,0 +1,16 @@
+group Main
+    source https://api.nuget.org/v3/index.json
+    storage:none
+
+nuget Fable.Import.Browser
+    nuget FSharp.Core
+    nuget Fable.Core 
+    nuget Suave 
+    nuget Selenium.WebDriver
+    clitool dotnet-fable 
+
+group Build
+  framework >= net45
+  source https://api.nuget.org/v3/index.json
+
+  nuget FAKE ~> 4.64.6

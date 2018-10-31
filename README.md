@@ -58,6 +58,7 @@ async {
     printfn "Status: %d" response.statusCode 
     printfn "Content: %s" response.responseText
 
+    // response headers are lower cased
     response.responseHeaders
     |> Map.tryFind "content-length"
     |> Option.map int 

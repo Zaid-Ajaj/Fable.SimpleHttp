@@ -111,9 +111,11 @@ module Http =
             | _, BodyContent.Text value -> xhr.send(value)
             | _, BodyContent.Form formData -> xhr.send(formData)
 
+    /// Sets the body content of the request
     let content (bodyContent: BodyContent) (req: HttpRequest) : HttpRequest = 
         { req with content = bodyContent }
 
+    /// Sends a GET request to the specified url and returns the response text if status code is 200, otherwise throws. 
     let get url : Async<string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
@@ -129,6 +131,7 @@ module Http =
             
             xhr.send(None)      
 
+    /// Safely sends a GET request and returns a tuple(status code * response text). This function does not throw.
     let getSafe url : Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
@@ -138,6 +141,7 @@ module Http =
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None) 
 
+    /// Sends a PUT request to the specified url and returns the response text if status code is 200, otherwise throws. 
     let put url (data: string) : Async<string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
@@ -151,8 +155,9 @@ module Http =
                        let errorMsg = error (int xhr.status) xhr.statusText url
                        reject (new System.Exception(errorMsg)) 
             
-            xhr.send(data)      
+            xhr.send(data)
 
+    /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
     let putSafe url (date: string): Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
@@ -162,10 +167,11 @@ module Http =
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None) 
 
+    /// Sends a PATCH request to the specified url and returns the response text if status code is 200, otherwise throws. 
     let patch url (data: string) : Async<string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
-            xhr.``open``("PUT", url)
+            xhr.``open``("PATCH", url)
             xhr.onreadystatechange <- fun _ ->
               if int xhr.readyState = 4 (* DONE *)
               then if xhr.status = 200.0
@@ -177,10 +183,11 @@ module Http =
             
             xhr.send(data)      
 
+    /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
     let patchSafe url (data: string) : Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
-            xhr.``open``("PUT", url)
+            xhr.``open``("PATCH", url)
             xhr.onreadystatechange <- fun _ ->
                 if int xhr.readyState = 4 (* DONE *)
                 then resolve (int xhr.status, xhr.responseText)

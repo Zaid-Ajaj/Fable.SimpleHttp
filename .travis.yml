@@ -4,4 +4,4 @@ dotnet: 2.0.0
 dist: trusty
 
 script:
-  - travis_wait ./build.sh
+  - ./build.sh Test

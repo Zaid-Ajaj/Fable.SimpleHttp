@@ -3,6 +3,8 @@ group Main
     storage:none
 
 nuget Fable.Import.Browser
+nuget Fable.Remoting.Json
+nuget Fable.SimpleJson
     nuget FSharp.Core
     nuget Fable.Core 
     nuget Suave 

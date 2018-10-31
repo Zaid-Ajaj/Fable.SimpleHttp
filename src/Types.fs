@@ -1,7 +1,4 @@
 namespace Fable.SimpleHttp
-
-open Fable.Import.JS
-open Fable.Import.Browser
  
 type HttpMethod = 
     | GET
@@ -18,6 +15,7 @@ type Header = Header of string * string
 type BodyContent = 
     | Empty
     | Text of string 
+    | Form of Fable.Import.Browser.FormData 
 
 type HttpRequest = {
     url: string 
@@ -30,4 +28,5 @@ type HttpResponse = {
     statusCode: int 
     responseText: string
     responseType: string 
-}
+    responseHeaders: Map<string, string>
+} 

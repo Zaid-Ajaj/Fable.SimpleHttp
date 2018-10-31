@@ -13,9 +13,14 @@ open Suave.Filters
 open OpenQA.Selenium
 open OpenQA.Selenium.Chrome
 open System.Text
+open Fable.Remoting.Json 
+open Newtonsoft.Json
+open Newtonsoft.Json
 
 let (</>) x y = Path.Combine(x, y)
-
+let converter = FableJsonConverter() :> JsonConverter
+let serialize x = JsonConvert.SerializeObject(x, converter)
+ 
 let rec findRoot dir =
     if File.Exists(System.IO.Path.Combine(dir, "paket.dependencies"))
     then dir
@@ -53,10 +58,12 @@ let main argv =
       choose [ 
         GET >=> Files.browseHome
         GET >=> path "/api/get-first" >=> OK "first" 
-        POST >=> path "/api/echo" >=> request (fun r -> OK (utf8 r.rawForm))
+        POST >=> path "/api/post-echo" >=> request (fun r -> OK (utf8 r.rawForm))
+        GET >=> path "/api/echo-headers" >=> request (fun r -> OK (serialize r.headers))
+        POST >=> path "/api/echo-form" >=> request (fun r -> OK (serialize [r.fieldData "firstName"; r.fieldData "lastName"]))
         OK "Not Found" >=> Writers.setStatus HttpCode.HTTP_404
       ]
-
+ 
     if not runningTests 
     then 
       printfn "Starting web server..."

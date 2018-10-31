@@ -7,13 +7,79 @@ Install from nuget using paket
 ```sh
 paket add nuget Fable.SimpleHttp --project path/to/YourProject.fsproj 
 ```
-Make sure the references are added to your paket files
-```sh
-# paket.dependencies (solution-wide dependencies)
-nuget Fable.SimpleHttp
 
-# paket.refernces (project-specific dependencies)
-Fable.SimpleHttp
+## Usage
+```fs
+open Fable.SimpleHttp 
+
+// GET request, returns response text when successful 
+
+async {
+    let! reponseText = Http.get "/api/data"
+    printfn "recieved data %s" responseText
+}
+
+// Safe GET request (does not throw)
+
+async {
+    let! (statusCode, responseText) = Http.getSafe "/api/data"
+
+    match statusCode with 
+    | 200 -> printfn "Everything is fine => %s" responseText
+    | _ -> printfn "Status %d => %s" statusCode responseText
+}
+
+// POST request 
+
+async {
+    let inputData = "{ \"id\": 1 }"
+    let! responseText = Http.post "/api/echo" inputData
+    printfn "Server responded => %s" responseText 
+}
+
+// Safe POST request (does not throw) 
+
+async {
+    let requestData = "{ \"id\": 1 }"
+    let! (statusCode, responseText) = Http.post "/api/echo" inputData
+    printfn "Server responded => %s" responseText 
+}
+
+// Fully configurable request 
+async {
+    let! response = 
+        Http.request "/api/data"
+        |> Http.method POST 
+        |> Http.content (BodyContent.Text "{ }")
+        |> Http.header (Headers.contentType "application/json")
+        |> Http.header (Headers.authorization "Bearer <token>")
+        |> Http.send 
+
+    printfn "Status: %d" response.statusCode 
+    printfn "Content: %s" response.responseText
+
+    response.responseHeaders
+    |> Map.tryFind "content-length"
+    |> Option.map int 
+    |> Optioin.iter (printfn "Content length: %d") 
+}
+
+
+// Sending form data 
+async {
+    let formData = 
+        FormData.create()
+        |> FormData.append "firstName" "Zaid"
+        |> FormData.append "lastName" "Ajaj"
+    
+    let! response = 
+        Http.request "/api/echo-form"
+        |> Http.method POST 
+        |> Http.content (BodyContent.Form formData)
+        |> Http.send 
+
+    printfn "Status => %d" response.statusCode
+}
 ```
 
 ## Building and running tests
@@ -24,12 +90,12 @@ Requirements
  - Node 10.0+
 
 
-Running the watching the tests live 
+Watch mode: both client and server live 
 ```sh
-./build.sh RunLiveTests 
+./build.sh Start 
 ```
-Building the tests and running them using QUnut cli runner
+Running the the end-to-end tests
 ```sh
-./build.sh RunTests
+./build.sh Test
 ```
 or just `Ctrl + Shift + B` to run the cli tests as a VS Code task

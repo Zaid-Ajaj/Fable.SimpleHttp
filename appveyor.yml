@@ -6,6 +6,6 @@ environment:
   nodejs_version: "10.10.0"
 
 build_script:
-- sh: ./build.sh RunTests
+- sh: ./build.sh
 
 test: off

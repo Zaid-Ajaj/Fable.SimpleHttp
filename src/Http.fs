@@ -41,7 +41,7 @@ module Http =
                        let errorMsg = error (int xhr.status) xhr.statusText url
                        reject (new System.Exception(errorMsg)) 
             
-            xhr.send(None) 
+            xhr.send(None)      
 
     let getSafe url : Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
@@ -51,3 +51,26 @@ module Http =
                 if int xhr.readyState = 4 (* DONE *)
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None) 
+            
+    let post url (data:string) : Async<string> = 
+        Async.FromContinuations <| fun (resolve, reject, _) ->  
+            let xhr = XMLHttpRequest.Create()
+            xhr.``open``("POST", url)
+            xhr.onreadystatechange <- fun _ ->
+              if int xhr.readyState = 4 (* DONE *)
+              then if xhr.status = 200.0
+                   then resolve xhr.responseText 
+                   else 
+                       let error = sprintf "Server responded with %d Error (%s) for POST request at %s" 
+                       let errorMsg = error (int xhr.status) xhr.statusText url
+                       reject (new System.Exception(errorMsg)) 
+            xhr.send(data)    
+
+    let postSafe url (data: string) : Async<int * string> = 
+        Async.FromContinuations <| fun (resolve, reject, _) ->  
+            let xhr = XMLHttpRequest.Create()
+            xhr.``open``("POST", url)
+            xhr.onreadystatechange <- fun _ ->
+                if int xhr.readyState = 4 (* DONE *)
+                then resolve (int xhr.status, xhr.responseText)
+            xhr.send(data) 

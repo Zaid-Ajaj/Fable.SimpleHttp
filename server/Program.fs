@@ -12,7 +12,8 @@ open Suave.Operators
 open Suave.Filters
 open OpenQA.Selenium
 open OpenQA.Selenium.Chrome
-    
+open System.Text
+
 let (</>) x y = Path.Combine(x, y)
 
 let rec findRoot dir =
@@ -46,12 +47,15 @@ let main argv =
             bufferSize = 2048
             cancellationToken = cts.Token }
 
+    let utf8 (bytes: byte []) = Encoding.UTF8.GetString bytes 
+    
     let webApp = 
-        choose [ 
-            GET >=> Files.browseHome
-            GET >=> path "/api/get-first" >=> OK "first" 
-            OK "Not Found" >=> Writers.setStatus HttpCode.HTTP_404
-        ]
+      choose [ 
+        GET >=> Files.browseHome
+        GET >=> path "/api/get-first" >=> OK "first" 
+        POST >=> path "/api/echo" >=> request (fun r -> OK (utf8 r.rawForm))
+        OK "Not Found" >=> Writers.setStatus HttpCode.HTTP_404
+      ]
 
     if not runningTests 
     then 

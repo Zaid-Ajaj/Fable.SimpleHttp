@@ -38,3 +38,25 @@ testCaseAsync "Http.getSafe resolves correctly when response is 404" <| fun test
         test.areEqual status 404
         test.areEqual responseText "Not Found"
     }
+
+testCaseAsync "Http.post resolves correctly when resposne is 200" <| fun test ->
+    async {
+        let input = "my data"
+        let! responseText = Http.post "/api/echo" input
+        test.areEqual input responseText
+    }
+
+testCaseAsync "Http.post throws when resposne is 404" <| fun test ->
+    async {
+        let input = "data"
+        let! responseText = Http.post "/api/echo" input
+        test.areEqual input responseText
+    }
+
+testCaseAsync "Http.postSafe, well, safely resolves when response is 200" <| fun test ->
+    async {
+        let input = "data"
+        let! (statuscode, responseText) = Http.postSafe "/api/echo" input 
+        test.areEqual 200 statuscode 
+        test.areEqual input responseText
+    }

@@ -2,5 +2,9 @@ language: csharp
 mono: 5.2.0
 dotnet: 2.0.0
 dist: trusty
+
+before_install:
+  - chmod +x build.sh
+
 script:
   - travis_wait ./build.sh

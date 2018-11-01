@@ -43,7 +43,7 @@ async {
 
 async {
     let requestData = "{ \"id\": 1 }"
-    let! (statusCode, responseText) = Http.post "/api/echo" inputData
+    let! (statusCode, responseText) = Http.postSafe "/api/echo" inputData
     printfn "Server responded => %s" responseText 
 }
 

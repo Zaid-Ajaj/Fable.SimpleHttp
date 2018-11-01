@@ -81,6 +81,28 @@ async {
 
     printfn "Status => %d" response.statusCode
 }
+
+
+// Send and receive binary data with Blobs
+// use FileReader module 
+async {
+    let blob = Blob.fromText "input data" 
+
+    let! response = 
+       Http.request "/api/echoBinary"
+       |> Http.method POST 
+       |> Http.content (BodyContent.Binary blob)
+       |> Http.overrideResponseType ResponseTypes.Blob
+       |> Http.send  
+
+    match response.content with 
+    | ResponseContent.Blob content -> 
+        let! blobContent = FileReader.readBlobAsText content
+        printfn "Received content: %s" blobContent // "Received content: input data"
+
+    | _ ->
+        printfn "Unexpected response content"
+}
 ```
 
 ## Building and running tests

@@ -54,6 +54,13 @@ let main argv =
 
     let utf8 (bytes: byte []) = Encoding.UTF8.GetString bytes 
     
+
+    let okBytes (input: byte []) : WebPart = 
+      fun ctx -> async {
+        let nextCtx = { ctx  with response = { ctx.response  with HttpResult.content = HttpContent.Bytes input; HttpResult.status = HTTP_200.status } }
+        return Some nextCtx
+      }
+
     let webApp = 
       choose [ 
         GET >=> Files.browseHome
@@ -61,6 +68,7 @@ let main argv =
         POST >=> path "/api/post-echo" >=> request (fun r -> OK (utf8 r.rawForm))
         GET >=> path "/api/echo-headers" >=> request (fun r -> OK (serialize r.headers))
         POST >=> path "/api/echo-form" >=> request (fun r -> OK (serialize [r.fieldData "firstName"; r.fieldData "lastName"]))
+        POST >=> path "/api/echoBinary" >=> request (fun r -> okBytes r.rawForm) >=> Writers.setMimeType "application/octet-stream"
         OK "Not Found" >=> Writers.setStatus HttpCode.HTTP_404
       ]
  

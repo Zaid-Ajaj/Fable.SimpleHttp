@@ -6,6 +6,8 @@ open Fable.SimpleJson
 
 registerModule "Simple Http Tests"
  
+setTimeout 5000
+
 testCaseAsync "Http.get returns text when status is OK" <| fun test ->
     async {
         let! text = Http.get "/api/get-first"
@@ -121,3 +123,30 @@ testCaseAsync "Form data can be round-tripped" <| fun test ->
         | [ Choice1Of2 "Zaid"; Choice1Of2 "Ajaj" ] -> test.pass()
         | otherwise -> test.unexpected otherwise
     }  
+
+testCaseAsync "Binary blob data can be roundtripped" <| fun test -> 
+    async {
+        let blob = Blob.fromText "hello!"
+
+        let! response = 
+            Http.request "/api/echoBinary"
+            |> Http.method POST 
+            |> Http.overrideResponseType ResponseTypes.Blob
+            |> Http.content (BodyContent.Binary blob)
+            |> Http.send 
+
+        test.areEqual 200 response.statusCode
+        test.areEqual "" response.responseText
+
+        match response.content with 
+        | ResponseContent.Blob result -> 
+            let! content = FileReader.readBlobAsText result 
+            test.areEqual "hello!" content 
+        | _ -> 
+            test.failwith "Expected to read binary data"
+
+        Map.tryFind "content-type" response.responseHeaders 
+        |> function 
+            | Some "application/octet-stream" -> test.pass()
+            | _ -> test.unexpected response.responseHeaders
+    }

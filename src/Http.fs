@@ -4,6 +4,33 @@ open Fable.Import.Browser
 open Fable.Core.Exceptions
 open Fable.Core 
 
+
+module Blob = 
+    [<Emit("new Blob([$0], { 'mimeType':'text/plain' })")>]
+    let fromText (value: string) : Blob = jsNative 
+
+
+module FileReader = 
+    /// Asynchronously reads the blob data content as string
+    let readBlobAsText (blob: Blob) : Async<string> = 
+        Async.FromContinuations <| fun (resolve, _, _) ->
+            let reader = FileReader.Create()
+            reader.onload <- fun _ ->
+                if int reader.readyState = 2 (* DONE *) 
+                then resolve (unbox reader.result)
+            
+            reader.readAsText(blob)
+
+    /// Asynchronously reads the blob data content as string
+    let readFileAsText (file: File) : Async<string> = 
+        Async.FromContinuations <| fun (resolve, _, _) ->
+            let reader = FileReader.Create()
+            reader.onload <- fun _ ->
+                if int reader.readyState = 2 (* DONE *) 
+                then resolve (unbox reader.result)
+            
+            reader.readAsText(file)
+
 module FormData = 
 
     [<Emit("new FormData()")>]
@@ -43,6 +70,24 @@ module Headers =
     let acceptLanguage value = Header("Accept-Language", value)
     let acceptDateTime value = Header("Accept-Datetime", value) 
     let authorization value = Header("Authorization", value)
+    let cacheControl value = Header("Cache-Control", value)
+    let connection value = Header("Connection", value)
+    let cookie value = Header("Cookie", value)
+    let contentMD5 value = Header("Content-MD5", value)
+    let date value = Header("Date", value)
+    let expect value = Header("Expect", value)
+    let ifMatch value = Header("If-Match", value)
+    let ifModifiedSince value = Header("If-Modified-Since", value)
+    let ifNoneMatch value = Header("If-None-Match", value)
+    let ifRange value = Header("If-Range", value)
+    let IfUnmodifiedSince value = Header("If-Unmodified-Since", value)
+    let maxForwards value = Header("Max-Forwards", value)
+    let origin value = Header ("Origin", value)
+    let pragma value = Header("Pragma", value)
+    let proxyAuthorization value = Header("Proxy-Authorization", value)
+    let range value = Header("Range", value)
+    let referer value = Header("Referer", value)
+    let userAgent value = Header("User-Agent", value)
     let create key value = Header(key, value)
 
 module Http = 
@@ -51,6 +96,7 @@ module Http =
           method = HttpMethod.GET
           headers = []
           overridenMimeType = None
+          overridenResponseType = None
           content = BodyContent.Empty }
 
     [<Emit("$1.split($0)")>]
@@ -84,6 +130,10 @@ module Http =
     /// Specifies a MIME type other than the one provided by the server to be used instead when interpreting the data being transferred in a request. This may be used, for example, to force a stream to be treated and parsed as "text/xml", even if the server does not report it as such.
     let overrideMimeType (value: string) (req: HttpRequest) = 
         { req with overridenMimeType = Some value }
+
+    /// Change the expected response type from the server
+    let overrideResponseType (value: ResponseTypes) (req: HttpRequest) = 
+        { req with overridenResponseType = Some value }
     
     /// Sends the request to the server
     let send (req: HttpRequest) : Async<HttpResponse> = 
@@ -93,7 +143,12 @@ module Http =
             xhr.onreadystatechange <- fun _ ->
                 if int xhr.readyState = 4 (* DONE *)
                 then resolve {
-                    responseText = xhr.responseText
+                    responseText = 
+                        match xhr.responseType with 
+                        | "" -> xhr.responseText
+                        | "text" -> xhr.responseText 
+                        | _ -> ""
+
                     statusCode = int xhr.status 
                     responseType = xhr.responseType
                     content = 
@@ -109,9 +164,9 @@ module Http =
                         |> Array.choose (fun headerLine -> 
                             let parts = splitAt ":" headerLine 
                             match List.ofArray parts with 
-                            | key :: rest ->  Some (key.ToLower(), String.concat ":" rest)
+                            | key :: rest ->  Some (key.ToLower(), (String.concat ":" rest).Trim())
                             | otherwise -> None)
-                        |> Map.ofArray
+                        |> Map.ofArray 
                 }
 
             for (Header(key, value)) in req.headers do
@@ -121,11 +176,18 @@ module Http =
             | Some mimeType -> xhr.overrideMimeType(mimeType)
             | None -> () 
 
+            match req.overridenResponseType with 
+            | Some ResponseTypes.Text -> xhr.responseType <- "text"
+            | Some ResponseTypes.Blob -> xhr.responseType <- "blob"
+            | Some ResponseTypes.ArrayBuffer -> xhr.responseType <- "arraybuffer"
+            | None -> ()
+
             match req.method, req.content with 
             | GET, _ -> xhr.send(None) 
             | _, BodyContent.Empty -> xhr.send(None)
             | _, BodyContent.Text value -> xhr.send(value)
             | _, BodyContent.Form formData -> xhr.send(formData)
+            | _, BodyContent.Binary blob -> xhr.send(blob)
 
     /// Sets the body content of the request
     let content (bodyContent: BodyContent) (req: HttpRequest) : HttpRequest = 

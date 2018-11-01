@@ -15,13 +15,20 @@ type Header = Header of string * string
 type BodyContent = 
     | Empty
     | Text of string 
+    | Binary of Fable.Import.Browser.Blob
     | Form of Fable.Import.Browser.FormData 
+
+type ResponseTypes = 
+    | Text 
+    | Blob
+    | ArrayBuffer 
 
 type HttpRequest = {
     url: string 
     method: HttpMethod 
     headers: Header list
     overridenMimeType: Option<string> 
+    overridenResponseType: Option<ResponseTypes>
     content: BodyContent
 } 
 

@@ -18,6 +18,7 @@ type BodyContent =
     | Binary of Fable.Import.Browser.Blob
     | Form of Fable.Import.Browser.FormData 
 
+[<RequireQualifiedAccess>]
 type ResponseTypes = 
     | Text 
     | Blob

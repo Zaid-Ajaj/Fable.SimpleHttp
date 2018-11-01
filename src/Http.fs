@@ -153,7 +153,7 @@ module Http =
                     responseType = xhr.responseType
                     content = 
                         match xhr.responseType with 
-                        | ("" | "text" | "json") -> ResponseContent.Text xhr.responseText
+                        | ("" | "text") -> ResponseContent.Text xhr.responseText
                         | "arraybuffer" -> ResponseContent.ArrayBuffer (unbox xhr.response) 
                         | "blob" -> ResponseContent.Blob (unbox xhr.response) 
                         | _ -> ResponseContent.Unknown xhr.response 

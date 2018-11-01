@@ -2,6 +2,8 @@
 
 A library for easily making Http requests in Fable projects.
 
+![simplehttp](https://user-images.githubusercontent.com/13316248/47852698-df146700-dddc-11e8-9d7f-6aee23e0b2f3.png)
+
 ### Installation
 Install from nuget using paket
 ```sh

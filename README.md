@@ -62,7 +62,7 @@ async {
     response.responseHeaders
     |> Map.tryFind "content-length"
     |> Option.map int 
-    |> Optioin.iter (printfn "Content length: %d") 
+    |> Option.iter (printfn "Content length: %d") 
 }
 
 

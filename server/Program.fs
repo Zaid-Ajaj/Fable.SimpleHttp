@@ -101,6 +101,7 @@ let main argv =
     | true -> 
         autoClose <- true 
         options.AddArgument("--headless")
+        options.AddArgument("--no-sandbox")
     | false -> () 
 
     printfn "Starting FireFox Driver"

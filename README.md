@@ -1,6 +1,6 @@
 # Fable.SimpleHttp [![Build Status](https://travis-ci.org/Zaid-Ajaj/Fable.SimpleHttp.svg?branch=master)](https://travis-ci.org/Zaid-Ajaj/Fable.SimpleHttp) [![Build status](https://ci.appveyor.com/api/projects/status/i17usjpn7bbiwm9n?svg=true)](https://ci.appveyor.com/project/Zaid-Ajaj/fable-SimpleHttp) [![Nuget](https://img.shields.io/nuget/v/Fable.SimpleHttp.svg?maxAge=0&colorB=brightgreen)](https://www.nuget.org/packages/Fable.SimpleHttp)
 
-A library for easily making Http requests in Fable projects.
+A library for easily working with Http in Fable projects.
 
 ![simplehttp](https://user-images.githubusercontent.com/13316248/47852698-df146700-dddc-11e8-9d7f-6aee23e0b2f3.png)
 
@@ -14,17 +14,12 @@ paket add nuget Fable.SimpleHttp --project path/to/YourProject.fsproj
 ```fs
 open Fable.SimpleHttp 
 
-// GET request, returns response text when successful 
+// Functions from the Http module are all safe and do not throw exceptions
+
+// GET request
 
 async {
-    let! reponseText = Http.get "/api/data"
-    printfn "recieved data %s" responseText
-}
-
-// Safe GET request (does not throw)
-
-async {
-    let! (statusCode, responseText) = Http.getSafe "/api/data"
+    let! (statusCode, responseText) = Http.get "/api/data"
 
     match statusCode with 
     | 200 -> printfn "Everything is fine => %s" responseText
@@ -34,16 +29,8 @@ async {
 // POST request 
 
 async {
-    let inputData = "{ \"id\": 1 }"
-    let! responseText = Http.post "/api/echo" inputData
-    printfn "Server responded => %s" responseText 
-}
-
-// Safe POST request (does not throw) 
-
-async {
     let requestData = "{ \"id\": 1 }"
-    let! (statusCode, responseText) = Http.postSafe "/api/echo" inputData
+    let! (statusCode, responseText) = Http.post "/api/echo" inputData
     printfn "Server responded => %s" responseText 
 }
 

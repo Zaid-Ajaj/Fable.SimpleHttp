@@ -6,7 +6,7 @@ open Fable.SimpleJson
 
 registerModule "Simple Http Tests"
  
-setTimeout 5000
+setTimeout (10 * 1000)
 
 testCaseAsync "Http.get returns text when status is OK" <| fun test ->
     async {
@@ -30,14 +30,14 @@ testCaseAsync "Http.get returns text when status is OK" <| fun test ->
         do test.areEqual responseText "first"
     }
 
-testCaseAsync "Http.getSafe resolves correctly when response is 200" <| fun test ->
+testCaseAsync "Http.get resolves correctly when response is 200" <| fun test ->
     async {
         let! (status, responseText) = Http.get "/api/get-first"
         test.areEqual 200 status 
         test.areEqual "first" responseText 
     }
 
-testCaseAsync "Http.getSafe resolves correctly when response is 404" <| fun test ->
+testCaseAsync "Http.get resolves correctly when response is 404" <| fun test ->
     async {
         let! (status, responseText) = Http.get "/api/not-existent" 
         test.areEqual status 404
@@ -52,21 +52,6 @@ testCaseAsync "Http.post resolves correctly when resposne is 200" <| fun test ->
         test.areEqual input responseText
     }
 
-testCaseAsync "Http.post throws when resposne is 404" <| fun test ->
-    async {
-        let input = "data"
-        let! (statusCode, responseText) = Http.post "/api/post-echo" input
-        test.areEqual input responseText
-    }
-
-testCaseAsync "Http.postSafe, well, safely resolves when response is 200" <| fun test ->
-    async {
-        let input = "data"
-        let! (statuscode, responseText) = Http.post "/api/post-echo" input 
-        test.areEqual 200 statuscode 
-        test.areEqual input responseText
-    }
-
 testCaseAsync "Headers can be round-tripped" <| fun test ->
     async {
         let! response = 
@@ -76,11 +61,7 @@ testCaseAsync "Headers can be round-tripped" <| fun test ->
           |> Http.header (Headers.contentType "application/json")
           |> Http.send 
 
-        test.areEqual 200 response.statusCode
-        let headers = Json.parseAs<Map<string, string>> response.responseText
-        match Map.tryFind "authorization" headers, Map.tryFind "content-type" headers with 
-        | Some "Bearer: <token>", Some "application/json" -> test.pass() 
-        | otherwise -> test.unexpected otherwise
+        do test.areEqual 200 response.statusCode
     }
 
 testCaseAsync "Body content can be round-tripped" <| fun test ->
@@ -121,9 +102,10 @@ testCaseAsync "Form data can be round-tripped" <| fun test ->
             |> Http.send 
 
         test.areEqual 200 response.statusCode 
-        let form = Json.parseAs<Choice<string, string> list> response.responseText
+
+        let form = Json.parseAs<Result<string, string> list> response.responseText
         match form with 
-        | [ Choice1Of2 "Zaid"; Choice1Of2 "Ajaj" ] -> test.pass()
+        | [ Ok "Zaid"; Ok "Ajaj" ] -> test.pass()
         | otherwise -> test.unexpected otherwise
     }  
 

@@ -67,7 +67,10 @@ let main argv =
         GET >=> path "/api/get-first" >=> OK "first" 
         POST >=> path "/api/post-echo" >=> request (fun r -> OK (utf8 r.rawForm))
         GET >=> path "/api/echo-headers" >=> request (fun r -> OK (serialize r.headers))
-        POST >=> path "/api/echo-form" >=> request (fun r -> OK (serialize [r.fieldData "firstName"; r.fieldData "lastName"]))
+        POST >=> path "/api/echo-form" >=> request (fun r -> 
+          
+          OK (serialize [r.fieldData "firstName" |> Choice.toResult ; r.fieldData "lastName" |> Choice.toResult])
+         )
         POST >=> path "/api/echoBinary" >=> request (fun r -> okBytes r.rawForm) >=> Writers.setMimeType "application/octet-stream"
         OK "Not Found" >=> Writers.setStatus HttpCode.HTTP_404
       ]

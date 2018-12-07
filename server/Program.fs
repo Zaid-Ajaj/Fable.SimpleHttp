@@ -105,8 +105,6 @@ let main argv =
 
     printfn "Starting FireFox Driver"
     use driver = new FirefoxDriver(driversDir, options)
-    
-
     driver.Url <- sprintf "http://localhost:%d/index.html" port
     
     let mutable testsFinishedRunning = false

@@ -12,8 +12,6 @@ let platformTool tool winTool =
   |> ProcessHelper.tryFindFileOnPath
   |> function Some t -> t | _ -> failwithf "%s not found" tool
 
-let nodeTool = platformTool "node" "node.exe"
-
 let mutable dotnetCli = "dotnet"
 
 let run fileName args workingDir =
@@ -56,7 +54,7 @@ Target "InstallNpmPackages" (fun _ ->
   printfn "Node version:"
   run "node" "--version" __SOURCE_DIRECTORY__
   run "npm" "--version" __SOURCE_DIRECTORY__
-  run "npm" "install" __SOURCE_DIRECTORY__
+  run "yarn" "install" __SOURCE_DIRECTORY__
 )
 
 Target "RestoreFableTestProject" <| fun _ ->

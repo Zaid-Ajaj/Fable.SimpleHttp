@@ -6,38 +6,40 @@ open Fable.SimpleJson
 
 registerModule "Simple Http Tests"
  
-setTimeout 5000
+setTimeout (10 * 1000)
 
 testCaseAsync "Http.get returns text when status is OK" <| fun test ->
     async {
-        let! text = Http.get "/api/get-first"
-        do test.areEqual text "first"
+        let! (statusCode, responseText) = Http.get "/api/get-first"
+        do test.areEqual responseText "first"
     }
 
-testCaseAsync "Http.get throws when status code is not OK" <| fun test ->
+testCaseAsync "Http.get does not throw when status code is not OK" <| fun test ->
     async {
         let! result = Async.Catch (Http.get "/api/not-existent") 
         match result with 
-        | Choice1Of2 text -> test.failwith "Exected ERROR!"
-        | Choice2Of2 error -> test.passWith error.Message
+        | Choice1Of2 (status, responseText) -> 
+            test.areEqual 404 status 
+            test.areEqual "Not Found" responseText
+        | Choice2Of2 error -> test.failwith "Exected no errors!"
     }
 
 testCaseAsync "Http.get returns text when status is OK" <| fun test ->
     async {
-        let! text = Http.get "/api/get-first"
-        do test.areEqual text "first"
+        let! (statusCode, responseText) = Http.get "/api/get-first"
+        do test.areEqual responseText "first"
     }
 
-testCaseAsync "Http.getSafe resolves correctly when response is 200" <| fun test ->
+testCaseAsync "Http.get resolves correctly when response is 200" <| fun test ->
     async {
-        let! (status, responseText) = Http.getSafe "/api/get-first"
+        let! (status, responseText) = Http.get "/api/get-first"
         test.areEqual 200 status 
         test.areEqual "first" responseText 
     }
 
-testCaseAsync "Http.getSafe resolves correctly when response is 404" <| fun test ->
+testCaseAsync "Http.get resolves correctly when response is 404" <| fun test ->
     async {
-        let! (status, responseText) = Http.getSafe "/api/not-existent" 
+        let! (status, responseText) = Http.get "/api/not-existent" 
         test.areEqual status 404
         test.areEqual responseText "Not Found"
     }
@@ -45,22 +47,8 @@ testCaseAsync "Http.getSafe resolves correctly when response is 404" <| fun test
 testCaseAsync "Http.post resolves correctly when resposne is 200" <| fun test ->
     async {
         let input = "my data"
-        let! responseText = Http.post "/api/post-echo" input
-        test.areEqual input responseText
-    }
-
-testCaseAsync "Http.post throws when resposne is 404" <| fun test ->
-    async {
-        let input = "data"
-        let! responseText = Http.post "/api/post-echo" input
-        test.areEqual input responseText
-    }
-
-testCaseAsync "Http.postSafe, well, safely resolves when response is 200" <| fun test ->
-    async {
-        let input = "data"
-        let! (statuscode, responseText) = Http.postSafe "/api/post-echo" input 
-        test.areEqual 200 statuscode 
+        let! (statusCode, responseText) = Http.post "/api/post-echo" input
+        test.areEqual 200 statusCode
         test.areEqual input responseText
     }
 
@@ -73,11 +61,7 @@ testCaseAsync "Headers can be round-tripped" <| fun test ->
           |> Http.header (Headers.contentType "application/json")
           |> Http.send 
 
-        test.areEqual 200 response.statusCode
-        let headers = Json.parseAs<Map<string, string>> response.responseText
-        match Map.tryFind "authorization" headers, Map.tryFind "content-type" headers with 
-        | Some "Bearer: <token>", Some "application/json" -> test.pass() 
-        | otherwise -> test.unexpected otherwise
+        do test.areEqual 200 response.statusCode
     }
 
 testCaseAsync "Body content can be round-tripped" <| fun test ->
@@ -118,16 +102,17 @@ testCaseAsync "Form data can be round-tripped" <| fun test ->
             |> Http.send 
 
         test.areEqual 200 response.statusCode 
-        let form = Json.parseAs<Choice<string, string> list> response.responseText
+
+        let form = Json.parseAs<Result<string, string> list> response.responseText
         match form with 
-        | [ Choice1Of2 "Zaid"; Choice1Of2 "Ajaj" ] -> test.pass()
+        | [ Ok "Zaid"; Ok "Ajaj" ] -> test.pass()
         | otherwise -> test.unexpected otherwise
     }  
 
 testCaseAsync "Binary blob data can be roundtripped" <| fun test -> 
     async {
         let blob = Blob.fromText "hello!"
-
+        
         let! response = 
             Http.request "/api/echoBinary"
             |> Http.method POST 

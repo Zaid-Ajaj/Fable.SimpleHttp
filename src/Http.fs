@@ -6,10 +6,12 @@ open Fable.Core
 
 
 module Blob = 
+    /// Creates a Blob from the given input string
     [<Emit("new Blob([$0], { 'mimeType':'text/plain' })")>]
     let fromText (value: string) : Blob = jsNative 
 
 
+/// Utility functions to work with blob and file APIs.
 module FileReader = 
     /// Asynchronously reads the blob data content as string
     let readBlobAsText (blob: Blob) : Async<string> = 
@@ -135,7 +137,7 @@ module Http =
     let overrideResponseType (value: ResponseTypes) (req: HttpRequest) = 
         { req with overridenResponseType = Some value }
     
-    /// Sends the request to the server
+    /// Sends the request to the server, this function does not throw
     let send (req: HttpRequest) : Async<HttpResponse> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
@@ -191,26 +193,10 @@ module Http =
 
     /// Sets the body content of the request
     let content (bodyContent: BodyContent) (req: HttpRequest) : HttpRequest = 
-        { req with content = bodyContent }
-
-    /// Sends a GET request to the specified url and returns the response text if status code is 200, otherwise throws. 
-    let get url : Async<string> = 
-        Async.FromContinuations <| fun (resolve, reject, _) ->  
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("GET", url)
-            xhr.onreadystatechange <- fun _ ->
-              if int xhr.readyState = 4 (* DONE *)
-              then if xhr.status = 200.0
-                   then resolve xhr.responseText 
-                   else 
-                       let error = sprintf "Server responded with %d Error (%s) for GET request at %s" 
-                       let errorMsg = error (int xhr.status) xhr.statusText url
-                       reject (new System.Exception(errorMsg)) 
-            
-            xhr.send(None)      
+        { req with content = bodyContent }  
 
     /// Safely sends a GET request and returns a tuple(status code * response text). This function does not throw.
-    let getSafe url : Async<int * string> = 
+    let get url : Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("GET", url)
@@ -219,24 +205,8 @@ module Http =
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None) 
 
-    /// Sends a PUT request to the specified url and returns the response text if status code is 200, otherwise throws. 
-    let put url (data: string) : Async<string> = 
-        Async.FromContinuations <| fun (resolve, reject, _) ->  
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("PUT", url)
-            xhr.onreadystatechange <- fun _ ->
-              if int xhr.readyState = 4 (* DONE *)
-              then if xhr.status = 200.0
-                   then resolve xhr.responseText 
-                   else 
-                       let error = sprintf "Server responded with %d Error (%s) for GET request at %s" 
-                       let errorMsg = error (int xhr.status) xhr.statusText url
-                       reject (new System.Exception(errorMsg)) 
-            
-            xhr.send(data)
-
     /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
-    let putSafe url (date: string): Async<int * string> = 
+    let put url (date: string): Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("PUT", url)
@@ -244,25 +214,19 @@ module Http =
                 if int xhr.readyState = 4 (* DONE *)
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None) 
-
-    /// Sends a PATCH request to the specified url and returns the response text if status code is 200, otherwise throws. 
-    let patch url (data: string) : Async<string> = 
+    
+    /// Safely sends a DELETE request and returns a tuple(status code * response text). This function does not throw.
+    let delete url (date: string): Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
-            xhr.``open``("PATCH", url)
+            xhr.``open``("DELETE", url)
             xhr.onreadystatechange <- fun _ ->
-              if int xhr.readyState = 4 (* DONE *)
-              then if xhr.status = 200.0
-                   then resolve xhr.responseText 
-                   else 
-                       let error = sprintf "Server responded with %d Error (%s) for GET request at %s" 
-                       let errorMsg = error (int xhr.status) xhr.statusText url
-                       reject (new System.Exception(errorMsg)) 
-            
-            xhr.send(data)      
+                if int xhr.readyState = 4 (* DONE *)
+                then resolve (int xhr.status, xhr.responseText)
+            xhr.send(None) 
 
     /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
-    let patchSafe url (data: string) : Async<int * string> = 
+    let patch url (data: string) : Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("PATCH", url)
@@ -271,21 +235,8 @@ module Http =
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(data) 
 
-    let post url (data:string) : Async<string> = 
-        Async.FromContinuations <| fun (resolve, reject, _) ->  
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("POST", url)
-            xhr.onreadystatechange <- fun _ ->
-              if int xhr.readyState = 4 (* DONE *)
-              then if xhr.status = 200.0
-                   then resolve xhr.responseText 
-                   else 
-                       let error = sprintf "Server responded with %d Error (%s) for POST request at %s" 
-                       let errorMsg = error (int xhr.status) xhr.statusText url
-                       reject (new System.Exception(errorMsg)) 
-            xhr.send(data)    
-
-    let postSafe url (data: string) : Async<int * string> = 
+    /// Safely sends a POST request and returns a tuple(status code * response text). This function does not throw.
+    let post url (data: string) : Async<int * string> = 
         Async.FromContinuations <| fun (resolve, reject, _) ->  
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("POST", url)

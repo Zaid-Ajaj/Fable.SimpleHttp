@@ -6,5 +6,5 @@ sudo: true
 node_js: 
   - "10.10.0"
 script:
-  - ./install-node.sh
+  - bash install-node.sh
   - ./build.sh

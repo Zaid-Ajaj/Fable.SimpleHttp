@@ -1,6 +1,6 @@
 # Fable.SimpleHttp [![Build Status](https://travis-ci.org/Zaid-Ajaj/Fable.SimpleHttp.svg?branch=master)](https://travis-ci.org/Zaid-Ajaj/Fable.SimpleHttp)  [![Nuget](https://img.shields.io/nuget/v/Fable.SimpleHttp.svg?maxAge=0&colorB=brightgreen)](https://www.nuget.org/packages/Fable.SimpleHttp)
 
-A library for easily working with Http in Fable projects.
+A library for easily working with Http in Fable projects. It doesn't use the browser [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) so it's compatible with IE 11 without a fetch polyfill.
 
 ### Installation
 Install from nuget using paket

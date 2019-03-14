@@ -5,7 +5,7 @@ group Main
 nuget Fable.Browser.XMLHttpRequest
 nuget Fable.Browser.Dom >= 1.0.0-alpha-004
 nuget Fable.Remoting.Json
-nuget Fable.SimpleJson
+nuget Fable.SimpleJson 3.0.0-beta
 nuget FSharp.Core
 nuget Fable.Core prerelease
 nuget Suave

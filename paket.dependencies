@@ -2,14 +2,14 @@ group Main
     source https://api.nuget.org/v3/index.json
     storage:none
 
-nuget Fable.Import.Browser
+nuget Fable.Browser.XMLHttpRequest
+nuget Fable.Browser.Dom >= 1.0.0-alpha-004
 nuget Fable.Remoting.Json
 nuget Fable.SimpleJson
-    nuget FSharp.Core
-    nuget Fable.Core 
-    nuget Suave 
-    nuget Selenium.WebDriver
-    clitool dotnet-fable 
+nuget FSharp.Core
+nuget Fable.Core prerelease
+nuget Suave
+nuget Selenium.WebDriver
 
 group Build
   framework >= net45

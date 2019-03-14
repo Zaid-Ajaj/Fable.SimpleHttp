@@ -1,49 +1,49 @@
 namespace Fable.SimpleHttp
- 
-type HttpMethod = 
+
+type HttpMethod =
     | GET
     | POST
     | PUT
-    | PATCH 
+    | PATCH
     | DELELE
     | HEAD
     | OPTIONS
 
-type Header = Header of string * string 
+type Header = Header of string * string
 
 [<RequireQualifiedAccess>]
-type BodyContent = 
+type BodyContent =
     | Empty
-    | Text of string 
-    | Binary of Fable.Import.Browser.Blob
-    | Form of Fable.Import.Browser.FormData 
+    | Text of string
+    | Binary of Browser.Types.Blob
+    | Form of Browser.Types.FormData
 
 [<RequireQualifiedAccess>]
-type ResponseTypes = 
-    | Text 
+type ResponseTypes =
+    | Text
     | Blob
-    | ArrayBuffer 
+    | ArrayBuffer
 
 type HttpRequest = {
-    url: string 
-    method: HttpMethod 
+    url: string
+    method: HttpMethod
     headers: Header list
-    overridenMimeType: Option<string> 
+    overridenMimeType: Option<string>
     overridenResponseType: Option<ResponseTypes>
     content: BodyContent
-} 
+}
 
 [<RequireQualifiedAccess>]
-type ResponseContent = 
-    | Text of string 
-    | Blob of Fable.Import.Browser.Blob 
-    | ArrayBuffer of Fable.Import.JS.ArrayBuffer
+type ResponseContent =
+    | Text of string
+    | Blob of Browser.Types.Blob
+    | ArrayBuffer of Fable.Core.JS.ArrayBuffer
     | Unknown of obj
 
 type HttpResponse = {
-    statusCode: int 
+    statusCode: int
     responseText: string
-    responseType: string 
+    responseType: string
     responseHeaders: Map<string, string>
     content : ResponseContent
-} 
+}

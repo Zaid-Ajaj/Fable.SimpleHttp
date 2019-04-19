@@ -3,9 +3,9 @@ group Main
     storage:none
 
 nuget Fable.Browser.XMLHttpRequest
-nuget Fable.Browser.Dom >= 1.0.0-alpha-004
+nuget Fable.Browser.Dom
 nuget Fable.Remoting.Json
-nuget Fable.SimpleJson 3.0.0-beta
+nuget Fable.SimpleJson
 nuget FSharp.Core
 nuget Fable.Core prerelease
 nuget Suave

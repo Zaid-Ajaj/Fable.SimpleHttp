@@ -143,7 +143,7 @@ module Http =
             let xhr = XMLHttpRequest.Create()
             xhr.``open``(serializeMethod req.method, req.url)
             xhr.onreadystatechange <- fun _ ->
-                if int xhr.readyState = 4 (* DONE *)
+                if xhr.readyState = ReadyState.Done
                 then resolve {
                     responseText =
                         match xhr.responseType with
@@ -201,7 +201,7 @@ module Http =
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("GET", url)
             xhr.onreadystatechange <- fun _ ->
-                if int xhr.readyState = 4 (* DONE *)
+                if xhr.readyState = ReadyState.Done 
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None)
 
@@ -211,7 +211,7 @@ module Http =
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("PUT", url)
             xhr.onreadystatechange <- fun _ ->
-                if int xhr.readyState = 4 (* DONE *)
+                if xhr.readyState = ReadyState.Done 
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None)
 
@@ -221,7 +221,7 @@ module Http =
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("DELETE", url)
             xhr.onreadystatechange <- fun _ ->
-                if int xhr.readyState = 4 (* DONE *)
+                if xhr.readyState = ReadyState.Done 
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(None)
 
@@ -231,7 +231,7 @@ module Http =
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("PATCH", url)
             xhr.onreadystatechange <- fun _ ->
-                if int xhr.readyState = 4 (* DONE *)
+                if xhr.readyState = ReadyState.Done
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(data)
 
@@ -241,6 +241,6 @@ module Http =
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("POST", url)
             xhr.onreadystatechange <- fun _ ->
-                if int xhr.readyState = 4 (* DONE *)
+                if xhr.readyState = ReadyState.Done
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(data)

@@ -11,6 +11,8 @@ type HttpMethod =
 
 type Header = Header of string * string
 
+#if FABLE_COMPILER 
+
 [<RequireQualifiedAccess>]
 type BodyContent =
     | Empty
@@ -47,3 +49,5 @@ type HttpResponse = {
     responseHeaders: Map<string, string>
     content : ResponseContent
 }
+
+#endif

@@ -4,6 +4,8 @@ open QUnit
 open Fable.SimpleHttp
 open Fable.SimpleJson 
 
+#if FABLE_COMPILER 
+
 registerModule "Simple Http Tests"
  
 setTimeout (10 * 1000)
@@ -135,3 +137,5 @@ testCaseAsync "Binary blob data can be roundtripped" <| fun test ->
             | Some "application/octet-stream" -> test.pass()
             | _ -> test.unexpected response.responseHeaders
     }
+
+#endif

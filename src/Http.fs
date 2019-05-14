@@ -1,5 +1,7 @@
 namespace Fable.SimpleHttp
 
+#if FABLE_COMPILER 
+
 open Browser
 open Browser.Types
 open Fable.Core
@@ -64,6 +66,8 @@ module FormData =
         form.append (key, blob, fileName)
         form
 
+#endif
+
 module Headers =
     let contentType value = Header("Content-Type", value)
     let accept value = Header("Accept", value)
@@ -92,7 +96,10 @@ module Headers =
     let userAgent value = Header("User-Agent", value)
     let create key value = Header(key, value)
 
+#if FABLE_COMPILER
+
 module Http =
+
     let private defaultRequest =
         { url = "";
           method = HttpMethod.GET
@@ -244,3 +251,30 @@ module Http =
                 if xhr.readyState = ReadyState.Done
                 then resolve (int xhr.status, xhr.responseText)
             xhr.send(data)
+#else
+
+module Http = 
+
+    open System.Net.Http
+    open System.Net
+
+    let get (url: string) : Async<int * string> =  
+        async {
+            use client = new HttpClient()
+            let! response = Async.AwaitTask(client.GetAsync(url)) 
+            let statusCode = int response.StatusCode
+            let! responseBody = Async.AwaitTask(response.Content.ReadAsStringAsync())
+            return statusCode, responseBody
+        }
+
+    let post (url: string) (data: string) : Async<int * string> = 
+        async {
+            use client = new HttpClient()
+            let input = new StringContent(data, System.Text.Encoding.UTF8)
+            let! response = Async.AwaitTask(client.PostAsync(url, input)) 
+            let statusCode = int response.StatusCode
+            let! responseBody = Async.AwaitTask(response.Content.ReadAsStringAsync())
+            return statusCode, responseBody
+        }
+        
+#endif

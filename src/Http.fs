@@ -213,17 +213,17 @@ module Http =
             xhr.send(None)
 
     /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
-    let put url (date: string): Async<int * string> =
+    let put url (data: string) : Async<int * string> =
         Async.FromContinuations <| fun (resolve, reject, _) ->
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("PUT", url)
             xhr.onreadystatechange <- fun _ ->
                 if xhr.readyState = ReadyState.Done 
                 then resolve (int xhr.status, xhr.responseText)
-            xhr.send(None)
+            xhr.send(data)
 
     /// Safely sends a DELETE request and returns a tuple(status code * response text). This function does not throw.
-    let delete url (date: string): Async<int * string> =
+    let delete url : Async<int * string> =
         Async.FromContinuations <| fun (resolve, reject, _) ->
             let xhr = XMLHttpRequest.Create()
             xhr.``open``("DELETE", url)

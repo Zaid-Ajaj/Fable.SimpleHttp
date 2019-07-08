@@ -5,13 +5,11 @@ type HttpMethod =
     | POST
     | PUT
     | PATCH
-    | DELELE
+    | DELETE
     | HEAD
     | OPTIONS
 
 type Header = Header of string * string
-
-#if FABLE_COMPILER 
 
 [<RequireQualifiedAccess>]
 type BodyContent =
@@ -49,5 +47,3 @@ type HttpResponse = {
     responseHeaders: Map<string, string>
     content : ResponseContent
 }
-
-#endif

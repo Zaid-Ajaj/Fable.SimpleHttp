@@ -10,7 +10,7 @@ node_modules/
 *.suo
 *.user
 *.sln.docstates
-
+.ionide
 # Xamarin Studio / monodevelop user-specific
 *.userprefs
 *.dll.mdb

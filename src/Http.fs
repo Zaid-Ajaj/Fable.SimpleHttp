@@ -1,11 +1,13 @@
 namespace Fable.SimpleHttp
 
-#if FABLE_COMPILER 
-
+open System
 open Browser
 open Browser.Types
 open Fable.Core
 
+#if !FABLE_COMPILER
+open System.Net.Http
+#endif
 
 module Blob =
     /// Creates a Blob from the given input string
@@ -66,8 +68,6 @@ module FormData =
         form.append (key, blob, fileName)
         form
 
-#endif
-
 module Headers =
     let contentType value = Header("Content-Type", value)
     let accept value = Header("Accept", value)
@@ -96,8 +96,6 @@ module Headers =
     let userAgent value = Header("User-Agent", value)
     let create key value = Header(key, value)
 
-#if FABLE_COMPILER
-
 module Http =
 
     let private defaultRequest =
@@ -108,15 +106,23 @@ module Http =
           overridenResponseType = None
           content = BodyContent.Empty }
 
-    [<Emit("$1.split($0)")>]
-    let private splitAt (delimeter: string) (input: string) : string [] = jsNative
+    let private emptyResponse =
+        { statusCode = 0
+          responseText = ""
+          responseType = ""
+          responseHeaders = Map.empty
+          content = ResponseContent.Text "" }
+
+    let private splitAt (delimiter: string) (input: string) : string [] =
+        if String.IsNullOrEmpty input then [| input |]
+        else input.Split([| delimiter |], StringSplitOptions.None)
 
     let private serializeMethod = function
         | HttpMethod.GET -> "GET"
         | HttpMethod.POST -> "POST"
         | HttpMethod.PATCH -> "PATCH"
         | HttpMethod.PUT -> "PUT"
-        | HttpMethod.DELELE -> "DELETE"
+        | HttpMethod.DELETE -> "DELETE"
         | HttpMethod.OPTIONS -> "OPTIONS"
         | HttpMethod.HEAD -> "HEAD"
 
@@ -144,8 +150,13 @@ module Http =
     let overrideResponseType (value: ResponseTypes) (req: HttpRequest) =
         { req with overridenResponseType = Some value }
 
+    /// Sets the body content of the request
+    let content (bodyContent: BodyContent) (req: HttpRequest) : HttpRequest =
+        { req with content = bodyContent }
+
     /// Sends the request to the server, this function does not throw
     let send (req: HttpRequest) : Async<HttpResponse> =
+#if FABLE_COMPILER
         Async.FromContinuations <| fun (resolve, reject, _) ->
             let xhr = XMLHttpRequest.Create()
             xhr.``open``(serializeMethod req.method, req.url)
@@ -197,84 +208,108 @@ module Http =
             | _, BodyContent.Text value -> xhr.send(value)
             | _, BodyContent.Form formData -> xhr.send(formData)
             | _, BodyContent.Binary blob -> xhr.send(blob)
+#else
+        async {
+            try
+                use requestMessage = new HttpRequestMessage()
+                requestMessage.RequestUri <- Uri(req.url)
+                requestMessage.Method <-
+                    match req.method with
+                    | HttpMethod.GET     -> HttpMethod.Get
+                    | HttpMethod.POST    -> HttpMethod.Post
+                    | HttpMethod.PUT     -> HttpMethod.Put
+                    | HttpMethod.PATCH   -> HttpMethod "PATCH"
+                    | HttpMethod.DELETE  -> HttpMethod.Delete
+                    | HttpMethod.HEAD    -> HttpMethod.Head
+                    | HttpMethod.OPTIONS -> HttpMethod.Options
+                req.headers
+                |> Seq.iter (fun (Header (key, value)) ->
+                    requestMessage.Headers.Add(key, value))
+                use content =
+                    match req.content with
+                    | BodyContent.Text text -> new StringContent(text)
+                    | BodyContent.Empty -> null
+                    | _ -> failwith "Only BodyContent.Text is supported in the dotnet implementation"
+                requestMessage.Content <- content
 
-    /// Sets the body content of the request
-    let content (bodyContent: BodyContent) (req: HttpRequest) : HttpRequest =
-        { req with content = bodyContent }
+                use client = new HttpClient()
+                let! response = client.SendAsync requestMessage |> Async.AwaitTask
+                let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
+
+                let headers =
+                    response.Headers
+                    |> Seq.choose (fun kv ->
+                        kv.Value
+                        |> Seq.tryLast
+                        |> Option.map (fun value -> kv.Key, value))
+                    |> Map.ofSeq
+
+                return
+                    { statusCode = int response.StatusCode
+                      responseText = responseBody
+                      responseType = "text"
+                      responseHeaders = headers
+                      content = ResponseContent.Text responseBody }
+            with
+            // We're catching a lot here to mimic the behaviour of the JS
+            // implementation, which isn't able to expose the kind of error.
+            | :? ArgumentException ->
+                return emptyResponse // invalid uri
+            | :? HttpRequestException
+            | :? AggregateException as aggrEx when (aggrEx.InnerException :? HttpRequestException) ->
+                return emptyResponse // connection errors
+        }
+#endif
 
     /// Safely sends a GET request and returns a tuple(status code * response text). This function does not throw.
     let get url : Async<int * string> =
-        Async.FromContinuations <| fun (resolve, reject, _) ->
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("GET", url)
-            xhr.onreadystatechange <- fun _ ->
-                if xhr.readyState = ReadyState.Done 
-                then resolve (int xhr.status, xhr.responseText)
-            xhr.send(None)
+        async {
+            let! response =
+                request url
+                |> method HttpMethod.GET
+                |> send
+            return response.statusCode, response.responseText
+        }
 
     /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
     let put url (data: string) : Async<int * string> =
-        Async.FromContinuations <| fun (resolve, reject, _) ->
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("PUT", url)
-            xhr.onreadystatechange <- fun _ ->
-                if xhr.readyState = ReadyState.Done 
-                then resolve (int xhr.status, xhr.responseText)
-            xhr.send(data)
+        async {
+            let! response =
+                request url
+                |> method HttpMethod.PUT
+                |> content (BodyContent.Text data)
+                |> send
+            return response.statusCode, response.responseText
+        }
 
     /// Safely sends a DELETE request and returns a tuple(status code * response text). This function does not throw.
     let delete url : Async<int * string> =
-        Async.FromContinuations <| fun (resolve, reject, _) ->
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("DELETE", url)
-            xhr.onreadystatechange <- fun _ ->
-                if xhr.readyState = ReadyState.Done 
-                then resolve (int xhr.status, xhr.responseText)
-            xhr.send(None)
+        async {
+            let! response =
+                request url
+                |> method HttpMethod.DELETE
+                |> send
+            return response.statusCode, response.responseText
+        }
 
     /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
     let patch url (data: string) : Async<int * string> =
-        Async.FromContinuations <| fun (resolve, reject, _) ->
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("PATCH", url)
-            xhr.onreadystatechange <- fun _ ->
-                if xhr.readyState = ReadyState.Done
-                then resolve (int xhr.status, xhr.responseText)
-            xhr.send(data)
+        async {
+            let! response =
+                request url
+                |> method HttpMethod.PATCH
+                |> content (BodyContent.Text data)
+                |> send
+            return response.statusCode, response.responseText
+        }
 
     /// Safely sends a POST request and returns a tuple(status code * response text). This function does not throw.
     let post url (data: string) : Async<int * string> =
-        Async.FromContinuations <| fun (resolve, reject, _) ->
-            let xhr = XMLHttpRequest.Create()
-            xhr.``open``("POST", url)
-            xhr.onreadystatechange <- fun _ ->
-                if xhr.readyState = ReadyState.Done
-                then resolve (int xhr.status, xhr.responseText)
-            xhr.send(data)
-#else
-
-module Http = 
-
-    open System.Net.Http
-    open System.Net
-
-    let get (url: string) : Async<int * string> =  
         async {
-            use client = new HttpClient()
-            let! response = Async.AwaitTask(client.GetAsync(url)) 
-            let statusCode = int response.StatusCode
-            let! responseBody = Async.AwaitTask(response.Content.ReadAsStringAsync())
-            return statusCode, responseBody
+            let! response =
+                request url
+                |> method HttpMethod.POST
+                |> content (BodyContent.Text data)
+                |> send
+            return response.statusCode, response.responseText
         }
-
-    let post (url: string) (data: string) : Async<int * string> = 
-        async {
-            use client = new HttpClient()
-            let input = new StringContent(data, System.Text.Encoding.UTF8)
-            let! response = Async.AwaitTask(client.PostAsync(url, input)) 
-            let statusCode = int response.StatusCode
-            let! responseBody = Async.AwaitTask(response.Content.ReadAsStringAsync())
-            return statusCode, responseBody
-        }
-        
-#endif

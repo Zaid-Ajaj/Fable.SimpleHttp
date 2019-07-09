@@ -106,6 +106,13 @@ module Http =
           overridenResponseType = None
           content = BodyContent.Empty }
 
+    let private emptyResponse =
+        { statusCode = 0
+          responseText = ""
+          responseType = ""
+          responseHeaders = Map.empty
+          content = ResponseContent.Text "" }
+
     let private splitAt (delimiter: string) (input: string) : string [] =
         if String.IsNullOrEmpty input then [| input |]
         else input.Split([| delimiter |], StringSplitOptions.None)
@@ -203,46 +210,54 @@ module Http =
             | _, BodyContent.Binary blob -> xhr.send(blob)
 #else
         async {
-            use requestMessage = new HttpRequestMessage()
-            requestMessage.RequestUri <- Uri(req.url)
-            requestMessage.Method <-
-                match req.method with
-                | HttpMethod.GET     -> HttpMethod.Get
-                | HttpMethod.POST    -> HttpMethod.Post
-                | HttpMethod.PUT     -> HttpMethod.Put
-                | HttpMethod.PATCH   -> HttpMethod "PATCH"
-                | HttpMethod.DELETE  -> HttpMethod.Delete
-                | HttpMethod.HEAD    -> HttpMethod.Head
-                | HttpMethod.OPTIONS -> HttpMethod.Options
-            req.headers
-            |> Seq.iter (fun (Header (key, value)) ->
-                requestMessage.Headers.Add(key, value))
-            use content =
-                match req.content with
-                | BodyContent.Text text -> new StringContent(text)
-                | BodyContent.Empty -> null
-                | _ -> failwith "Only BodyContent.Text is supported in the dotnet implementation"
-            requestMessage.Content <- content
+            try
+                use requestMessage = new HttpRequestMessage()
+                requestMessage.RequestUri <- Uri(req.url)
+                requestMessage.Method <-
+                    match req.method with
+                    | HttpMethod.GET     -> HttpMethod.Get
+                    | HttpMethod.POST    -> HttpMethod.Post
+                    | HttpMethod.PUT     -> HttpMethod.Put
+                    | HttpMethod.PATCH   -> HttpMethod "PATCH"
+                    | HttpMethod.DELETE  -> HttpMethod.Delete
+                    | HttpMethod.HEAD    -> HttpMethod.Head
+                    | HttpMethod.OPTIONS -> HttpMethod.Options
+                req.headers
+                |> Seq.iter (fun (Header (key, value)) ->
+                    requestMessage.Headers.Add(key, value))
+                use content =
+                    match req.content with
+                    | BodyContent.Text text -> new StringContent(text)
+                    | BodyContent.Empty -> null
+                    | _ -> failwith "Only BodyContent.Text is supported in the dotnet implementation"
+                requestMessage.Content <- content
 
-            use client = new HttpClient()
-            let! response = client.SendAsync requestMessage |> Async.AwaitTask
-            let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
+                use client = new HttpClient()
+                let! response = client.SendAsync requestMessage |> Async.AwaitTask
+                let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
 
-            let headers =
-                response.Headers
-                |> Seq.choose (fun kv ->
-                    kv.Value
-                    |> Seq.tryLast
-                    |> Option.map (fun value -> kv.Key, value))
-                |> Map.ofSeq
+                let headers =
+                    response.Headers
+                    |> Seq.choose (fun kv ->
+                        kv.Value
+                        |> Seq.tryLast
+                        |> Option.map (fun value -> kv.Key, value))
+                    |> Map.ofSeq
 
-            return {
-                statusCode = int response.StatusCode
-                responseText = responseBody
-                responseType = "text"
-                responseHeaders = headers
-                content = ResponseContent.Text responseBody
-            }
+                return
+                    { statusCode = int response.StatusCode
+                      responseText = responseBody
+                      responseType = "text"
+                      responseHeaders = headers
+                      content = ResponseContent.Text responseBody }
+            with
+            // We're catching a lot here to mimic the behaviour of the JS
+            // implementation, which isn't able to expose the kind of error.
+            | :? ArgumentException ->
+                return emptyResponse // invalid uri
+            | :? HttpRequestException
+            | :? AggregateException as aggrEx when (aggrEx.InnerException :? HttpRequestException) ->
+                return emptyResponse // connection errors
         }
 #endif
 

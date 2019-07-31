@@ -28,6 +28,7 @@ type HttpRequest = {
     url: string
     method: HttpMethod
     headers: Header list
+    withCredentials: bool
     overridenMimeType: Option<string>
     overridenResponseType: Option<ResponseTypes>
     content: BodyContent

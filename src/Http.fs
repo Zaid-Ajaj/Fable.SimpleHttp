@@ -102,6 +102,7 @@ module Http =
         { url = "";
           method = HttpMethod.GET
           headers = []
+          withCredentials = false
           overridenMimeType = None
           overridenResponseType = None
           content = BodyContent.Empty }
@@ -141,6 +142,10 @@ module Http =
     /// Appends a list of headers to the request configuration
     let headers (values: Header list) (req: HttpRequest)  =
         { req with headers = List.append req.headers values }
+
+    /// Enables cross-site credentials such as cookies
+    let withCredentials (req: HttpRequest) =
+        { req with withCredentials = true }
 
     /// Specifies a MIME type other than the one provided by the server to be used instead when interpreting the data being transferred in a request. This may be used, for example, to force a stream to be treated and parsed as "text/xml", even if the server does not report it as such.
     let overrideMimeType (value: string) (req: HttpRequest) =
@@ -191,6 +196,8 @@ module Http =
 
             for (Header(key, value)) in req.headers do
                 xhr.setRequestHeader(key, value)
+
+            xhr.withCredentials <- req.withCredentials
 
             match req.overridenMimeType with
             | Some mimeType -> xhr.overrideMimeType(mimeType)

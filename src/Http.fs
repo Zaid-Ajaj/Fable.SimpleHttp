@@ -144,8 +144,8 @@ module Http =
         { req with headers = List.append req.headers values }
 
     /// Enables cross-site credentials such as cookies
-    let withCredentials (req: HttpRequest) =
-        { req with withCredentials = true }
+    let withCredentials (enabled: bool) (req: HttpRequest) =
+        { req with withCredentials = enabled }
 
     /// Specifies a MIME type other than the one provided by the server to be used instead when interpreting the data being transferred in a request. This may be used, for example, to force a stream to be treated and parsed as "text/xml", even if the server does not report it as such.
     let overrideMimeType (value: string) (req: HttpRequest) =

@@ -52,7 +52,7 @@ Target "InstallNpmPackages" (fun _ ->
   printfn "Node version:"
   run "node" "--version" __SOURCE_DIRECTORY__
   run "npm" "--version" __SOURCE_DIRECTORY__
-  run "yarn" "install" __SOURCE_DIRECTORY__
+  run "npm" "install" __SOURCE_DIRECTORY__
 )
 
 Target "RunClient" <| fun _ ->

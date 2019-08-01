@@ -8,6 +8,10 @@
   <ItemGroup>
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PuppeteerSharp" Version="1.18.0" />
+  </ItemGroup>
   
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

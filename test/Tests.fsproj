@@ -1,16 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="QUnit.fs" />
-    <Compile Include="Tests.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\src\Fable.SimpleHttp.fsproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Fable.Mocha" Version="2.5.0" />
-  </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="Tests.fs" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\src\Fable.SimpleHttp.fsproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Fable.Mocha" Version="2.5.0" />
+    </ItemGroup>
+    <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

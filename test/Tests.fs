@@ -1,8 +1,5 @@
 module Tests
 
-#if FABLE_COMPILER
-
-open QUnit
 open Fable.SimpleHttp
 open Fable.SimpleJson
 open Fable.Mocha
@@ -149,4 +146,4 @@ let httpTests =
     ]
 
 Mocha.runTests httpTests
-#endif
+|> ignore

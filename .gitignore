@@ -17,7 +17,7 @@ node_modules/
 *.exe.mdb
 
 # Build results
-
+.local-chromium
 [Dd]ebug/
 [Rr]elease/
 x64/

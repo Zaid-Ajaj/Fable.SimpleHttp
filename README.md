@@ -1,16 +1,23 @@
 # Fable.SimpleHttp [![Build Status](https://travis-ci.org/Zaid-Ajaj/Fable.SimpleHttp.svg?branch=master)](https://travis-ci.org/Zaid-Ajaj/Fable.SimpleHttp) [![Build status](https://ci.appveyor.com/api/projects/status/fgbd40ahcyrec5uw?svg=true)](https://ci.appveyor.com/project/Zaid-Ajaj/fable-simplehttp) [![Nuget](https://img.shields.io/nuget/v/Fable.SimpleHttp.svg?maxAge=0&colorB=brightgreen)](https://www.nuget.org/packages/Fable.SimpleHttp)
 
-A library for easily working with Http in Fable projects. It doesn't use the browser [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) so it's compatible with IE 11 without a fetch polyfill.
+A library for easily working with Http in Fable projects.
+
+### Features
+
+ - Extremely simple API for working with HTTP requests and responses.
+ - Implemented in idiomatic F# Async (instead of promises which follow JS semantics)
+ - Supports sending and receiving raw binary data (i.e. browser `Blobs`)
+ - Built ontop of XMLHttpRequests available in all browsers (even IE11!) so it doesn't the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) nor it requires the fetch polyfill.
 
 ### Installation
 Install from nuget using paket
 ```sh
-paket add nuget Fable.SimpleHttp --project path/to/YourProject.fsproj 
+paket add nuget Fable.SimpleHttp --project path/to/YourProject.fsproj
 ```
 
 ## Usage
 ```fs
-open Fable.SimpleHttp 
+open Fable.SimpleHttp
 
 // Functions from the Http module are all safe and do not throw exceptions
 
@@ -19,71 +26,71 @@ open Fable.SimpleHttp
 async {
     let! (statusCode, responseText) = Http.get "/api/data"
 
-    match statusCode with 
+    match statusCode with
     | 200 -> printfn "Everything is fine => %s" responseText
     | _ -> printfn "Status %d => %s" statusCode responseText
 }
 
-// POST request 
+// POST request
 
 async {
     let requestData = "{ \"id\": 1 }"
     let! (statusCode, responseText) = Http.post "/api/echo" inputData
-    printfn "Server responded => %s" responseText 
+    printfn "Server responded => %s" responseText
 }
 
-// Fully configurable request 
+// Fully configurable request
 async {
-    let! response = 
+    let! response =
         Http.request "/api/data"
-        |> Http.method POST 
+        |> Http.method POST
         |> Http.content (BodyContent.Text "{ }")
         |> Http.header (Headers.contentType "application/json")
         |> Http.header (Headers.authorization "Bearer <token>")
-        |> Http.send 
+        |> Http.send
 
-    printfn "Status: %d" response.statusCode 
+    printfn "Status: %d" response.statusCode
     printfn "Content: %s" response.responseText
 
     // response headers are lower cased
     response.responseHeaders
     |> Map.tryFind "content-length"
-    |> Option.map int 
-    |> Option.iter (printfn "Content length: %d") 
+    |> Option.map int
+    |> Option.iter (printfn "Content length: %d")
 }
 
 
-// Sending form data 
+// Sending form data
 async {
-    let formData = 
+    let formData =
         FormData.create()
         |> FormData.append "firstName" "Zaid"
         |> FormData.append "lastName" "Ajaj"
-    
-    let! response = 
+
+    let! response =
         Http.request "/api/echo-form"
-        |> Http.method POST 
+        |> Http.method POST
         |> Http.content (BodyContent.Form formData)
-        |> Http.send 
+        |> Http.send
 
     printfn "Status => %d" response.statusCode
 }
 
 
 // Send and receive binary data with Blobs
-// use FileReader module 
+// use FileReader module
 async {
-    let blob = Blob.fromText "input data" 
+    let blob = Blob.fromText "input data"
 
-    let! response = 
+    let! response =
        Http.request "/api/echoBinary"
-       |> Http.method POST 
+       |> Http.method POST
        |> Http.content (BodyContent.Binary blob)
        |> Http.overrideResponseType ResponseTypes.Blob
-       |> Http.send  
+       |> Http.send
 
-    match response.content with 
-    | ResponseContent.Blob content -> 
+    match response.content with
+    | ResponseContent.Blob content ->
         let! blobContent = FileReader.readBlobAsText content
         printfn "Received content: %s" blobContent // "Received content: input data"
 
@@ -100,9 +107,9 @@ Requirements
  - Node 10.0+
 
 
-Watch mode: both client and server live 
+Watch mode: both client and server live
 ```sh
-./build.sh Start 
+./build.sh Start
 ```
 Running the the end-to-end tests
 ```sh

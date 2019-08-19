@@ -6,8 +6,8 @@ A library for easily working with Http in Fable projects.
 
  - Extremely simple API for working with HTTP requests and responses.
  - Implemented in idiomatic F# Async (instead of promises which follow JS semantics)
- - Supports sending and receiving raw binary data (i.e. browser `Blobs`)
- - Built ontop of XMLHttpRequests available in all browsers (even IE11!) so it doesn't the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) nor it requires the fetch polyfill.
+ - Supports sending and receiving raw binary data (i.e.`Blob` in the browser)
+ - Built on top of `XMLHttpRequest` available in all browsers (even IE11!) so it doesn't need the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) nor it's associated polyfill.
 
 ### Installation
 Install from nuget using paket

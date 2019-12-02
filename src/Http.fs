@@ -11,13 +11,13 @@ open System.Net.Http
 
 module Blob =
     /// Creates a Blob from the given input string
-    [<Emit("new Blob([$0], { 'mimeType':'text/plain' })")>]
+    [<Emit("new Blob([$0], { 'type':'text/plain' })")>]
     let fromText (value: string) : Blob = jsNative
 
 
 module File =
     /// Creates a File from the given input string and file name
-    [<Emit("new File([$0], $1, { 'mimeType':'text/plain' })")>]
+    [<Emit("new File([$0], $1, { 'type':'text/plain' })")>]
     let fromText (value: string) (fileName: string) : File = jsNative
 
 

@@ -17,6 +17,7 @@ type BodyContent =
     | Text of string
     | Binary of Browser.Types.Blob
     | Form of Browser.Types.FormData
+    | RawFile of Browser.Types.File
 
 [<RequireQualifiedAccess>]
 type ResponseTypes =

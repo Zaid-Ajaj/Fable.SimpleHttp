@@ -143,6 +143,33 @@ let httpTests =
                     | Some "application/octet-stream" -> test.pass()
                     | _ -> test.unexpected response.responseHeaders
             }
+
+        testCaseAsync "Raw file data can be roundtripped" <|
+            async {
+                let file = File.fromText "hello!" "hello.txt"
+
+                let! response =
+                    Http.request "/api/echoBinary"
+                    |> Http.method POST
+                    |> Http.overrideResponseType ResponseTypes.Blob
+                    |> Http.content (BodyContent.RawFile file)
+                    |> Http.send
+
+                test.areEqual 200 response.statusCode
+                test.areEqual "" response.responseText
+
+                match response.content with
+                | ResponseContent.Blob result ->
+                    let! content = FileReader.readBlobAsText result
+                    test.areEqual "hello!" content
+                | _ ->
+                    test.failwith "Expected to read binary data"
+
+                Map.tryFind "content-type" response.responseHeaders
+                |> function
+                    | Some "application/octet-stream" -> test.pass()
+                    | _ -> test.unexpected response.responseHeaders
+            }
     ]
 
 Mocha.runTests httpTests

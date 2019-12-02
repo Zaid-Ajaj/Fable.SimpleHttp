@@ -15,6 +15,12 @@ module Blob =
     let fromText (value: string) : Blob = jsNative
 
 
+module File =
+    /// Creates a File from the given input string and file name
+    [<Emit("new File([$0], $1, { 'mimeType':'text/plain' })")>]
+    let fromText (value: string) (fileName: string) : File = jsNative
+
+
 /// Utility functions to work with blob and file APIs.
 module FileReader =
     /// Asynchronously reads the blob data content as string
@@ -215,6 +221,7 @@ module Http =
             | _, BodyContent.Text value -> xhr.send(value)
             | _, BodyContent.Form formData -> xhr.send(formData)
             | _, BodyContent.Binary blob -> xhr.send(blob)
+            | _, BodyContent.RawFile file -> xhr.send(file)
 #else
         async {
             try

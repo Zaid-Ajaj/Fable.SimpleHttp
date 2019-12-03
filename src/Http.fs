@@ -221,7 +221,6 @@ module Http =
             | _, BodyContent.Text value -> xhr.send(value)
             | _, BodyContent.Form formData -> xhr.send(formData)
             | _, BodyContent.Binary blob -> xhr.send(blob)
-            | _, BodyContent.RawFile file -> xhr.send(file)
 #else
         async {
             try

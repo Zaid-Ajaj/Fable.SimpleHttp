@@ -305,7 +305,7 @@ module Http =
             return response.statusCode, response.responseText
         }
 
-    /// Safely sends a PUT request and returns a tuple(status code * response text). This function does not throw.
+    /// Safely sends a PATCH request and returns a tuple(status code * response text). This function does not throw.
     let patch url (data: string) : Async<int * string> =
         async {
             let! response =

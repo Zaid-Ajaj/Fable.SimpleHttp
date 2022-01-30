@@ -31,6 +31,7 @@ type HttpRequest = {
     withCredentials: bool
     overridenMimeType: Option<string>
     overridenResponseType: Option<ResponseTypes>
+    timeout: Option<int>
     content: BodyContent
 }
 

@@ -111,6 +111,7 @@ module Http =
           withCredentials = false
           overridenMimeType = None
           overridenResponseType = None
+          timeout = None
           content = BodyContent.Empty }
 
     let private emptyResponse =
@@ -152,6 +153,10 @@ module Http =
     /// Enables cross-site credentials such as cookies
     let withCredentials (enabled: bool) (req: HttpRequest) =
         { req with withCredentials = enabled }
+
+    /// Enabeles Http request timeout
+    let withTimeout (timeoutInMilliseconds: int) (req: HttpRequest) =
+        { req with timeout = Some timeoutInMilliseconds}
 
     /// Specifies a MIME type other than the one provided by the server to be used instead when interpreting the data being transferred in a request. This may be used, for example, to force a stream to be treated and parsed as "text/xml", even if the server does not report it as such.
     let overrideMimeType (value: string) (req: HttpRequest) =
@@ -215,6 +220,10 @@ module Http =
             | Some ResponseTypes.ArrayBuffer -> xhr.responseType <- "arraybuffer"
             | None -> ()
 
+            match req.timeout with
+            | Some timeout -> xhr.timeout <- timeout
+            | None -> ()
+
             match req.method, req.content with
             | GET, _ -> xhr.send(None)
             | _, BodyContent.Empty -> xhr.send(None)
@@ -246,6 +255,11 @@ module Http =
                 requestMessage.Content <- content
 
                 use client = new HttpClient()
+
+                match req.timeout with
+                | Some timeout -> client.Timeout <- TimeSpan.FromMilliseconds(timeout)
+                | None -> ()
+
                 let! response = client.SendAsync requestMessage |> Async.AwaitTask
                 let! responseBody = response.Content.ReadAsStringAsync() |> Async.AwaitTask
 

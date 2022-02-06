@@ -86,17 +86,14 @@ let httpTests =
 
         testCaseAsync "Timeout works as expected" <|
             async {
-                try
-                    let! response =
-                      Http.request "/api/post-echo"
-                      |> Http.method POST
-                      |> Http.content (BodyContent.Text "hello")
-                      |> Http.withTimeout 1
-                      |> Http.send
-                      
-                    test.failwith "Expected timeout exception"
-                with
-                | e -> ()
+                let! response =
+                    Http.request "/api/post-echo"
+                    |> Http.method POST
+                    |> Http.content (BodyContent.Text "hello")
+                    |> Http.withTimeout 1
+                    |> Http.send
+                    
+                test.areEqual 0 response.statusCode
             }
 
         testCaseAsync "Empty body content is allowed" <|

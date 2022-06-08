@@ -224,12 +224,11 @@ module Http =
             | Some timeout -> xhr.timeout <- timeout
             | None -> ()
 
-            match req.method, req.content with
-            | GET, _ -> xhr.send(None)
-            | _, BodyContent.Empty -> xhr.send(None)
-            | _, BodyContent.Text value -> xhr.send(value)
-            | _, BodyContent.Form formData -> xhr.send(formData)
-            | _, BodyContent.Binary blob -> xhr.send(blob)
+            match req.content with 
+            | BodyContent.Empty -> xhr.send()
+            | BodyContent.Text value -> xhr.send(value)
+            | BodyContent.Form formData -> xhr.send(formData)
+            | BodyContent.Binary blob -> xhr.send(blob)
 #else
         async {
             try

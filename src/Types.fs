@@ -46,6 +46,7 @@ type HttpResponse = {
     statusCode: int
     responseText: string
     responseType: string
+    responseUrl: string
     responseHeaders: Map<string, string>
     content : ResponseContent
 }

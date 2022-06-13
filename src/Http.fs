@@ -45,8 +45,8 @@ module FileReader =
 
 module FormData =
 
-    [<Emit("new FormData()")>]
     /// Creates a new FormData object
+    [<Emit("new FormData()")>]
     let create() : FormData = jsNative
 
     /// Appends a key-value pair to the form data
@@ -118,6 +118,7 @@ module Http =
         { statusCode = 0
           responseText = ""
           responseType = ""
+          responseUrl = ""
           responseHeaders = Map.empty
           content = ResponseContent.Text "" }
 
@@ -154,7 +155,7 @@ module Http =
     let withCredentials (enabled: bool) (req: HttpRequest) =
         { req with withCredentials = enabled }
 
-    /// Enabeles Http request timeout
+    /// Enables Http request timeout
     let withTimeout (timeoutInMilliseconds: int) (req: HttpRequest) =
         { req with timeout = Some timeoutInMilliseconds}
 
@@ -203,6 +204,8 @@ module Http =
                             | key :: rest ->  Some (key.ToLower(), (String.concat ":" rest).Trim())
                             | otherwise -> None)
                         |> Map.ofArray
+
+                    responseUrl = xhr.responseURL
                 }
 
             for (Header(key, value)) in req.headers do
@@ -275,6 +278,7 @@ module Http =
                       responseText = responseBody
                       responseType = "text"
                       responseHeaders = headers
+                      responseUrl = req.url
                       content = ResponseContent.Text responseBody }
             with
             // We're catching a lot here to mimic the behaviour of the JS

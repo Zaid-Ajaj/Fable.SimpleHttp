@@ -7,9 +7,9 @@
         <PackageIconUrl></PackageIconUrl>
         <PackageTags>fsharp;fable;http</PackageTags>
         <Authors>Zaid Ajaj</Authors>
-        <Version>3.2.0</Version>
+        <Version>3.3.0</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <PackageReleaseNotes>Do not special case GET and DELETE when sending request payloads</PackageReleaseNotes>
+        <PackageReleaseNotes>Expose responseUrl in HttpResponse in case of redirections</PackageReleaseNotes>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>
@@ -17,7 +17,7 @@
         <Compile Include="Http.fs" />
     </ItemGroup>
     <ItemGroup>
-        <Content Include="*.fsproj; *.fs;" PackagePath="fable\" />
+        <Content Include="*.fsproj; *.fs;" Exclude="**\*.fs.js" PackagePath="fable\" />
     </ItemGroup>
     <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

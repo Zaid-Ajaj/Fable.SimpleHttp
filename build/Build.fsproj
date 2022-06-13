@@ -6,12 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Tools.fs" />
+    <Compile Include="Files.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="PuppeteerSharp" Version="1.18.0" />
+    <PackageReference Include="Fake.Core.Environment" Version="5.20.4" />
+    <PackageReference Include="Fake.Core.Target" Version="5.20.4" />
   </ItemGroup>
-  
-  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

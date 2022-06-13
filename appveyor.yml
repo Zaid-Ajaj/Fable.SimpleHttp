@@ -16,17 +16,11 @@ install:
   - cmd: choco install dotnetcore-sdk --pre
   # Get the latest stable version of Node.js
   - ps: Install-Product node $env:nodejs_version
-  # # Update npm
-  # # There seems to be issues with npm 5.4 in Windows
-  # # See https://github.com/npm/npm/issues/18380
-  # - npm install -g npm@6.1.0
+  - cmd: dotnet run --project ./build/Build.fsproj -- build
 
 os: Visual Studio 2022
 
 build_script:
   - cmd: dotnet tool restore
-
-install:
-  - cmd: dotnet run --project ./build/Build.fsproj -- build
 
 test: off

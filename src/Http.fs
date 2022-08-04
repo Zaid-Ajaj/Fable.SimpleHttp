@@ -14,6 +14,18 @@ module Blob =
     [<Emit("new Blob([$0], { 'type':'text/plain' })")>]
     let fromText (value: string) : Blob = jsNative
 
+    [<Emit("window.URL.createObjectURL($0)")>]
+    let createObjectURL (blob: Blob) : string = jsNative
+
+    /// Download a Blob
+    let download (blob: Blob) (fileName: string) =
+        let element = unbox<HTMLAnchorElement> (document.createElement "a")
+        element.target <- "_blank"
+        element.href <- createObjectURL(blob)
+        element.setAttribute("download", fileName)
+        document.body.appendChild(element) |> ignore
+        element.click()
+        document.body.removeChild(element) |> ignore
 
 module File =
     /// Creates a File from the given input string and file name

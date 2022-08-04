@@ -26,8 +26,7 @@ let shell (shellArgs: ShellArgs list) =
         printfn "======"
         let exitCode = Shell.Exec(args.program, args.args, args.cwd)
         if exitCode <> 0 then failwith $"FAILED {args.cwd}> {args.program} {args.args}"
-             
-             
+
 let dotnet args cwd = {
     program = Tools.dotnet
     args = args
@@ -65,6 +64,7 @@ let args =
 match args with
 | [| "build" |] ->
      shell [
+        dotnet "tool restore" src
         dotnet "fable clean --yes" src
         dotnet "fable" src
         dotnet "build" src

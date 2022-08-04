@@ -7,9 +7,9 @@
         <PackageIconUrl></PackageIconUrl>
         <PackageTags>fsharp;fable;http</PackageTags>
         <Authors>Zaid Ajaj</Authors>
-        <Version>3.3.0</Version>
+        <Version>3.4.0</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <PackageReleaseNotes>Expose responseUrl in HttpResponse in case of redirections</PackageReleaseNotes>
+        <PackageReleaseNotes>Implement Blob.download function</PackageReleaseNotes>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>

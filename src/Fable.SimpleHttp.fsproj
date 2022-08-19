@@ -7,9 +7,9 @@
         <PackageIconUrl></PackageIconUrl>
         <PackageTags>fsharp;fable;http</PackageTags>
         <Authors>Zaid Ajaj</Authors>
-        <Version>3.4.0</Version>
+        <Version>3.5.0</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <PackageReleaseNotes>Implement Blob.download function</PackageReleaseNotes>
+        <PackageReleaseNotes>Removing prerelease flag from Fable.Core dependency</PackageReleaseNotes>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>

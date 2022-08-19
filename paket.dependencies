@@ -7,7 +7,7 @@ nuget Fable.Browser.Dom
 nuget Fable.Remoting.Json
 nuget Fable.SimpleJson
 nuget FSharp.Core
-nuget Fable.Core prerelease
+nuget Fable.Core
 nuget Suave
 nuget Selenium.WebDriver
 

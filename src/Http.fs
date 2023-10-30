@@ -135,7 +135,7 @@ module Http =
           content = ResponseContent.Text "" }
 
     let private splitAt (delimiter: string) (input: string) : string [] =
-        if String.IsNullOrEmpty input then [| input |]
+        if String.IsNullOrEmpty input then Array.empty
         else input.Split([| delimiter |], StringSplitOptions.None)
 
     let private serializeMethod = function
@@ -208,7 +208,11 @@ module Http =
                         | _ -> ResponseContent.Unknown xhr.response
 
                     responseHeaders =
-                        xhr.getAllResponseHeaders()
+                        let headers = xhr.getAllResponseHeaders()
+
+                        printfn $"XHR Headers: %A{headers}"
+
+                        headers
                         |> splitAt "\r\n"
                         |> Array.choose (fun headerLine ->
                             let parts = splitAt ":" headerLine

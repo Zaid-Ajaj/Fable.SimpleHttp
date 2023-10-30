@@ -208,11 +208,7 @@ module Http =
                         | _ -> ResponseContent.Unknown xhr.response
 
                     responseHeaders =
-                        let headers = xhr.getAllResponseHeaders()
-
-                        printfn $"XHR Headers: %A{headers}"
-
-                        headers
+                        xhr.getAllResponseHeaders()
                         |> splitAt "\r\n"
                         |> Array.choose (fun headerLine ->
                             let parts = splitAt ":" headerLine

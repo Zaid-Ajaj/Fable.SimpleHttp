@@ -135,7 +135,7 @@ module Http =
           content = ResponseContent.Text "" }
 
     let private splitAt (delimiter: string) (input: string) : string [] =
-        if String.IsNullOrEmpty input then [| input |]
+        if String.IsNullOrEmpty input then Array.empty
         else input.Split([| delimiter |], StringSplitOptions.None)
 
     let private serializeMethod = function
